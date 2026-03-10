@@ -1,0 +1,9 @@
+{
+  "title": "山东航宇游艇",
+  "subtitle": "船艇设计 · 制造 · 体验 · 水上运动",
+  "backgroundImage": "/hero.jpg",
+  "cta": [
+    { "label": "产品中心", "href": "/products" },
+    { "label": "关于我们", "href": "/about" }
+  ]
+}

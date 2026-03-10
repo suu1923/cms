@@ -1,0 +1,18 @@
+{
+  "name": "山东航宇游艇",
+  "nameEn": "Shandong Hangyu Yacht",
+  "description": "集船艇设计、制造与销售，游艇体验、休闲度假、水上运动为一体的综合性高新技术企业",
+  "contact": {
+    "phone": "13210577152",
+    "address": "山东省济宁市微山县韩庄船舶工业园区",
+    "wechat": "微信小程序",
+    "douyin": "抖音"
+  },
+  "footer": {
+    "copyright": "© 2026 山东航宇游艇发展有限公司",
+    "icp": "鲁ICP备17038766",
+    "links": [
+      { "label": "山东宇易科技股份有限公司", "href": "#" }
+    ]
+  }
+}

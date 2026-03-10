@@ -1,0 +1,37 @@
+{
+  "featured": [
+    {
+      "id": "2d",
+      "name": "66英尺豪华游艇",
+      "slug": "66ft-luxury",
+      "category": "游艇",
+      "summary": "66英尺豪华游艇是奢华与精湛工艺的完美结合。",
+      "description": "66英尺豪华游艇是奢华与精湛工艺的完美结合。每一寸的设计都反映了制造商的用心和技艺。从独特的外观到精心设计的内饰，这艘游艇散发出令人陶醉的奢华氛围。舒适的休息区、高档的家具、精致的装饰和现代化的设备，无不突显出这艘游艇的非凡品质。从高档的实木饰面到精致的皮革沙发，每一个细节都展现着舒适和优雅。游艇的布局设计采用了先进的技术和舒适性标准，确保乘客在航行中尽情享受。宽敞的甲板空间供您与亲朋好友一同尽情畅谈，同时舒适的卧室、设施齐全的浴室则为您提供舒适的私人空间。无论是您想要进行浪漫的海上度假，举办私人派对还是商务会议，这艘游艇都能满足您的个性化需求。这款66英尺的私人定制豪华游艇不仅是一种乐趣，更是一种生活方式的象征。其独特的设计、无限的个性化选择以及卓越的商务功能，使其成为成功人士和富豪们追求的选择。无论是作为私人度假场所，还是商务洽谈的场地，这艘游艇都是奢华体验的象征。",
+      "image": "https://hangyuchuanye.oss-cn-beijing.aliyuncs.com/66/main.jpg",
+      "featured": true
+    },
+    {"id": "1", "name": "12米水陆两栖船", "slug": "12m-liangqi", "category": "水陆两栖船", "summary": "亦车亦船，水陆两用。将车与船双重特性融合为一体。", "description": "12米水陆两栖船由航宇研发设计，亦车亦船，水陆两用。将车与船双重特性融合为一体，既能像观光车一样陆地穿梭行驶，又能像船一样在水域里航行。结合两栖特性，体现灵活优势，以其新奇独特的水陆观光方式，使游客旅程妙趣横生。", "image": "/products/liangqi-12m.jpg", "featured": true},
+    {"id": "1b", "name": "8米水陆两栖观光船", "slug": "8m-liangqi", "category": "水陆两栖船", "summary": "灵活机动，适合景区、湿地等短途接驳与观光。", "description": "8米级水陆两栖船，兼顾陆地与水面通行，适用于景区、湿地公园等场景的接驳与观光。", "image": "/products/liangqi-12m.jpg", "featured": true},
+    {"id": "1c", "name": "水陆两栖救援艇", "slug": "liangqi-jiuyuan", "category": "水陆两栖船", "summary": "应急救援与巡逻两用，水陆快速响应。", "description": "专为应急救援与水域巡逻设计的水陆两栖艇，可快速抵达陆地与水面现场。", "image": "/products/liangqi-12m.jpg", "featured": true},
+    {"id": "2", "name": "53英尺三体槽道式豪华游艇（两层）", "slug": "53ft-youting", "category": "游艇", "summary": "独特结构设计降低兴波阻力，高速与稳定兼得。", "description": "独特的结构设计降低船体兴波阻力，给您高速行驶的激情体验；纵享畅快飞驰的同时兼具稳定性和出色的操纵性，安全性高；百变空间超大利用率，精致内饰引领舒适出行。", "image": "/products/youting-53ft.jpg", "featured": true},
+    {"id": "2b", "name": "45英尺豪华休闲游艇", "slug": "45ft-youting", "category": "游艇", "summary": "休闲娱乐与商务接待兼备，空间舒适。", "description": "45英尺豪华游艇，适合家庭出游与商务接待，内饰考究，驾乘体验出色。", "image": "/products/youting-53ft.jpg", "featured": true},
+    {"id": "2c", "name": "双体帆船游艇", "slug": "shuangti-youting", "category": "游艇", "summary": "双体设计稳定性佳，适合海上休闲与体验。", "description": "双体结构带来出色稳定性与宽敞甲板空间，适合海上休闲、派对及帆船体验。", "image": "/products/youting-53ft.jpg", "featured": true},
+    {"id": "3", "name": "住宿船屋式趸船", "slug": "dunchuan-zhusu", "category": "趸船", "summary": "可靠的船体设计，超高稳定性。", "description": "由航宇游艇研发生产的住宿船屋式趸船，秉承航宇一贯追求卓越品质的精神，可靠的船体设计使住宿船屋式趸船具有超高的稳定性。", "image": "/products/dunchuan-zhusu.jpg", "featured": true},
+    {"id": "3b", "name": "餐饮娱乐趸船", "slug": "dunchuan-canyin", "category": "趸船", "summary": "水上餐饮、会务与休闲一体化平台。", "description": "适用于水上餐厅、会务接待及休闲娱乐的趸船，可根据需求定制功能与装修。", "image": "/products/dunchuan-zhusu.jpg", "featured": true},
+    {"id": "3c", "name": "码头接待趸船", "slug": "dunchuan-jiedai", "category": "趸船", "summary": "码头停靠与游客接待，稳固耐用。", "description": "用于码头停靠、游客上下船及接待服务的趸船，结构稳固，经久耐用。", "image": "/products/dunchuan-zhusu.jpg", "featured": true},
+    {"id": "4", "name": "300客位双层画舫船", "slug": "huafang-300", "category": "仿古画舫船", "summary": "古风客船，设计灵感来自中国传统建筑，韵味十足。", "description": "本船适用于景区内的古风客船。设计灵感来自中国传统建筑，韵味十足。外部造型典雅大气，内部装饰豪华，做工考究。乘坐画舫船荡漾在景区里，360度观赏水景，犹如穿梭于画卷里一般。", "image": "/products/huafang-300.jpg", "featured": true},
+    {"id": "4b", "name": "150客位画舫船", "slug": "huafang-150", "category": "仿古画舫船", "summary": "中型画舫，适合湖泊与景区游览。", "description": "150客位仿古画舫，造型典雅，适用于湖泊、景区等水域的观光与接待。", "image": "/products/huafang-300.jpg", "featured": true},
+    {"id": "4c", "name": "茶艺画舫船", "slug": "huafang-chayi", "category": "仿古画舫船", "summary": "小型画舫，茶艺与雅集专用。", "description": "小型仿古画舫，内设茶艺空间，适合水上雅集、茶会及高端接待。", "image": "/products/huafang-300.jpg", "featured": true}
+  ],
+  "categories": [
+    {"id": "youting", "name": "游艇", "slug": "youting"},
+    {"id": "kechuan", "name": "客船", "slug": "kechuan"},
+    {"id": "fanchuan", "name": "帆船", "slug": "fanchuan"},
+    {"id": "diaoyuting", "name": "钓鱼艇", "slug": "diaoyuting"},
+    {"id": "gongzuoting", "name": "工作艇", "slug": "gongzuoting"},
+    {"id": "dunchuan", "name": "趸船", "slug": "dunchuan"},
+    {"id": "huafang", "name": "仿古画舫船", "slug": "huafang"},
+    {"id": "liangqi", "name": "水陆两栖船", "slug": "liangqi"},
+    {"id": "xinnengyuan", "name": "新能源游艇", "slug": "xinnengyuan"}
+  ]
+}

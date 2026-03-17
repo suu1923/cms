@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_product_modules",
+  "info": {
+    "displayName": "产品模块"
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "code": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "content": {
+      "type": "json"
+    }
+  }
+}

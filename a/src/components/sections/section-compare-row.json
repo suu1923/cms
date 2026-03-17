@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_sections_section_compare_rows",
+  "info": {
+    "displayName": "对比行"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "valueA": {
+      "type": "string"
+    },
+    "valueB": {
+      "type": "string"
+    }
+  }
+}
+

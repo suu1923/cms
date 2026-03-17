@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_sections_section_sticky_story_steps",
+  "info": {
+    "displayName": "Sticky故事步骤"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "body": {
+      "type": "text"
+    },
+    "media": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    }
+  }
+}
+

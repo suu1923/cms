@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "third_party_contacts",
+  "info": {
+    "singularName": "third-party-contact",
+    "pluralName": "third-party-contacts",
+    "displayName": "第三方联系方式"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "url": {
+      "type": "string"
+    },
+    "qrcode": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
+

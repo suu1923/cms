@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_sections_section_grid_items",
+  "info": {
+    "displayName": "九宫格项"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
+

@@ -10,6 +10,11 @@
     "draftAndPublish": false
   },
   "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site"
+    },
     "title": {
       "type": "string",
       "required": true

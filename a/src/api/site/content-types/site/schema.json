@@ -4,7 +4,7 @@
   "info": {
     "singularName": "site",
     "pluralName": "sites",
-    "displayName": "site"
+    "displayName": "站点"
   },
   "options": {
     "draftAndPublish": true
@@ -16,6 +16,25 @@
     },
     "code": {
       "type": "uid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "icp": {
+      "type": "string"
+    },
+    "copyright": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "i18nEnabled": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

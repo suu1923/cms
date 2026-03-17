@@ -8,9 +8,15 @@ import {
   getAllCategorySlugs,
   getAllProductSlugs,
 } from "@/lib/content";
+import {
+  getProductFromCMSBySlug,
+  getStrapiMediaUrl,
+  type ProductFromCMS,
+} from "@/lib/cmsClient";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductSections, type ProductSection } from "@/components/sections/ProductSections";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -25,9 +31,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
+  const productFromCMS = await getProductFromCMSBySlug(slug);
   const product = getProductBySlug(slug);
   if (category) {
     return { title: `${category.name} | 产品中心 | 山东航宇游艇` };
+  }
+  if (productFromCMS) {
+    const attrs = productFromCMS.attributes;
+    return {
+      title: attrs.seo_title || `${attrs.name} | 产品中心 | 山东航宇游艇`,
+      description: attrs.seo_description || attrs.summary || undefined,
+      keywords: attrs.keywords || undefined,
+    };
   }
   if (product) {
     return {
@@ -41,6 +56,7 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function ProductsSlugPage({ params }: PageProps) {
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
+  const productFromCMS = await getProductFromCMSBySlug(slug);
   const product = getProductBySlug(slug);
 
   if (category) {
@@ -104,6 +120,10 @@ export default async function ProductsSlugPage({ params }: PageProps) {
     );
   }
 
+  if (productFromCMS) {
+    return <ProductDetailCMS product={productFromCMS} />;
+  }
+
   if (product) {
     if (product.slug === "66ft-luxury") {
       return <Luxury66Page />;
@@ -164,6 +184,134 @@ export default async function ProductsSlugPage({ params }: PageProps) {
   }
 
   notFound();
+}
+
+function ProductDetailCMS({ product }: { product: ProductFromCMS }) {
+  const attrs = product.attributes;
+  const coverUrl = getStrapiMediaUrl(attrs.cover);
+  const isVideo = attrs.isCoverVideo && coverUrl;
+  const parameters = attrs.parameters ?? [];
+  const modules = attrs.modules ?? [];
+  const sections = (attrs.sections ?? []) as ProductSection[];
+
+  return (
+    <div className="min-h-screen bg-white text-black">
+      <Header />
+      <main className="pt-28 pb-24 sm:pt-36">
+        <div className="mx-auto max-w-[900px] px-6 sm:px-8">
+          <nav className="mb-8 text-[13px] text-black/50" aria-label="面包屑">
+            <Link href="/" className="hover:text-black">首页</Link>
+            <span className="mx-2">/</span>
+            <Link href="/products" className="hover:text-black">产品中心</Link>
+            <span className="mx-2">/</span>
+            <span className="text-black/80">{attrs.name}</span>
+          </nav>
+
+          <h1 className="text-3xl font-light tracking-tight sm:text-4xl">
+            {attrs.name}
+          </h1>
+          {attrs.summary && (
+            <p className="mt-6 text-[17px] leading-relaxed text-black/80">
+              {attrs.summary}
+            </p>
+          )}
+
+          {coverUrl && (
+            <div className="relative mt-10 aspect-[16/10] overflow-hidden rounded-2xl bg-black/[0.04]">
+              {isVideo ? (
+                <video
+                  className="h-full w-full object-cover"
+                  src={coverUrl}
+                  controls
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <Image
+                  src={coverUrl}
+                  alt={attrs.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 900px) 100vw, 900px"
+                  unoptimized
+                />
+              )}
+            </div>
+          )}
+
+          {attrs.hasPanorama360 && (
+            <section className="mt-10 rounded-2xl border border-black/[0.08] bg-black/[0.02] p-6">
+              <h2 className="text-lg font-medium text-black/80">360° 全景</h2>
+              <p className="mt-2 text-[15px] text-black/60">
+                本产品支持 360° 全景预览，可在详情页或联系客服体验。
+              </p>
+            </section>
+          )}
+
+          {parameters.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-lg font-medium text-black/80">产品参数</h2>
+              <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+                {parameters.map((p, i) => (
+                  <div key={i} className="flex border-b border-black/[0.06] py-2">
+                    <dt className="w-28 shrink-0 text-[15px] text-black/60">{p.key}</dt>
+                    <dd className="text-[15px] text-black/90">{p.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+
+          {modules.length > 0 && (
+            <div className="mt-12 space-y-12">
+              {modules.map((mod, i) => (
+                <section key={i} className="border-t border-black/[0.06] pt-10">
+                  <h2 className="text-xl font-light tracking-tight text-black">
+                    {mod.name}
+                  </h2>
+                  {mod.description && (
+                    <p className="mt-4 text-[15px] leading-relaxed text-black/80">
+                      {mod.description}
+                    </p>
+                  )}
+                  {mod.content != null && typeof mod.content === "string" && (
+                    <div className="mt-4 text-[15px] leading-relaxed text-black/80">
+                      {mod.content as string}
+                    </div>
+                  )}
+                </section>
+              ))}
+            </div>
+          )}
+
+          {sections.length > 0 && <ProductSections sections={sections} />}
+
+          {attrs.description && (
+            <div className="mt-10 text-[15px] leading-relaxed text-black/80">
+              <p>{attrs.description}</p>
+            </div>
+          )}
+
+          <div className="mt-12 flex flex-wrap gap-4">
+            <a
+              href="tel:13210577152"
+              className="rounded-full border border-black/20 bg-black px-8 py-3 text-[14px] font-medium text-white transition hover:bg-black/90"
+            >
+              咨询订购
+            </a>
+            <Link
+              href="/products"
+              className="rounded-full border border-black/20 bg-transparent px-8 py-3 text-[14px] font-medium text-black transition hover:bg-black/[0.04]"
+            >
+              返回产品中心
+            </Link>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
 function Luxury66Page() {

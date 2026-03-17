@@ -3,16 +3,24 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { nav } from "@/lib/content";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [showLocale, setShowLocale] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    // 静态导出下不走服务端渲染读取站点配置，这里用 NEXT_PUBLIC_I18N_ENABLED 控制显示
+    // 你可以在 .env.local / 部署环境中设置 NEXT_PUBLIC_I18N_ENABLED=true
+    setShowLocale(process.env.NEXT_PUBLIC_I18N_ENABLED === "true");
   }, []);
 
   const isOverHero = !scrolled;
@@ -106,6 +114,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {showLocale && <LocaleSwitcher />}
           <button
             type="button"
             className="flex h-8 w-8 items-center justify-center md:hidden"

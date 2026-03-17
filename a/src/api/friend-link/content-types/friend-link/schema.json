@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "friend_links",
+  "info": {
+    "singularName": "friend-link",
+    "pluralName": "friend-links",
+    "displayName": "友情链接"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
+

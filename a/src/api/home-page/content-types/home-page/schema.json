@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "home_pages",
+  "info": {
+    "singularName": "home-page",
+    "pluralName": "home-pages",
+    "displayName": "首页（Sections）"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "required": true
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "sections.section-carousel",
+        "sections.section-grid",
+        "sections.section-split",
+        "sections.section-faq",
+        "sections.section-rich-text",
+        "sections.section-compare",
+        "sections.section-timeline",
+        "sections.section-sticky-story"
+      ]
+    }
+  }
+}
+

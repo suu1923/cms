@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_sections_section_timeline_items",
+  "info": {
+    "displayName": "时间线项"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
+

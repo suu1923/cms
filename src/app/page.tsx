@@ -6,14 +6,38 @@ import {
   about,
   site,
 } from "@/lib/content";
+import {
+  getHomeHeroFromCMS,
+  homeHeroFromCMSFallback,
+  getStrapiMediaUrl,
+  getHomePageFromCMS,
+  getHomePageSections,
+} from "@/lib/cmsClient";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCategories } from "@/components/ProductCategories";
 import { ProductStrip } from "@/components/ProductStrip";
+import { MarqueeText } from "@/components/MarqueeText";
+import { ProductSections, type ProductSection } from "@/components/sections/ProductSections";
 
-export default function Home() {
+export default async function Home() {
+  const heroFromCMS = await getHomeHeroFromCMS();
+  const heroData = homeHeroFromCMSFallback(hero, heroFromCMS);
+  const homePageFromCMS = await getHomePageFromCMS();
+  const homeSections = getHomePageSections(homePageFromCMS) as ProductSection[];
   const featured = getFeaturedProducts();
   const categories = getProductCategories();
+  const heroVideoUrl =
+    heroFromCMS ? getStrapiMediaUrl((heroFromCMS as { attributes?: { video?: unknown }; video?: unknown }).attributes?.video ?? heroFromCMS.video) : null;
+  const heroImageUrl =
+    heroFromCMS ? getStrapiMediaUrl((heroFromCMS as { attributes?: { image?: unknown }; image?: unknown }).attributes?.image ?? heroFromCMS.image) : null;
+  const heroIsVideo = Boolean(heroVideoUrl);
+  const marqueeEnabled = Boolean(
+    (heroFromCMS?.attributes?.marqueeEnabled ?? heroFromCMS?.marqueeEnabled) &&
+      (heroFromCMS?.attributes?.marqueeText ?? heroFromCMS?.marqueeText),
+  );
+  const marqueeText = (heroFromCMS?.attributes?.marqueeText ?? heroFromCMS?.marqueeText) ?? "";
+  const marqueeSpeed = (heroFromCMS?.attributes?.marqueeSpeed ?? heroFromCMS?.marqueeSpeed) ?? 28;
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -21,37 +45,55 @@ export default function Home() {
 
       {/* 首屏 Hero */}
       <section className="relative flex min-h-[100vh] flex-col items-center justify-end overflow-hidden bg-black pb-24 pt-28 text-white sm:pb-32 sm:pt-36">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url(/hero.jpg)" }}
-        />
+        {heroIsVideo ? (
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src={heroVideoUrl!}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        ) : (
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroImageUrl || heroData.backgroundImage})` }}
+          />
+        )}
         <div className="absolute inset-0 bg-black/35" />
-        <div className="relative z-10 flex max-w-[600px] flex-col items-center text-center">
+        <div className="relative z-10 flex w-full max-w-[600px] flex-col items-center text-center">
           <h1 className="text-4xl font-extralight tracking-tight sm:text-5xl md:text-6xl">
-            {hero.title}
+            {heroData.title}
           </h1>
           <p className="mt-4 text-lg font-normal text-white/90 sm:text-xl">
-            {hero.subtitle}
+            {heroData.subtitle}
           </p>
-          {hero.cta && hero.cta.length > 0 && (
+          {heroData.cta && heroData.cta.length > 0 && (
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link
-                href={hero.cta[0].href}
+                href={heroData.cta[0].href}
                 className="min-w-[140px] rounded border border-white bg-white px-8 py-2.5 text-center text-[13px] font-medium text-black transition hover:bg-white/90"
               >
-                {hero.cta[0].label}
+                {heroData.cta[0].label}
               </Link>
-              {hero.cta[1] && (
+              {heroData.cta[1] && (
                 <Link
-                  href={hero.cta[1].href}
+                  href={heroData.cta[1].href}
                   className="min-w-[140px] rounded border border-white/80 bg-transparent px-8 py-2.5 text-center text-[13px] font-medium text-white transition hover:bg-white/10"
                 >
-                  {hero.cta[1].label}
+                  {heroData.cta[1].label}
                 </Link>
               )}
             </div>
           )}
         </div>
+
+        {/* 底部滚动字幕（可选） */}
+        {marqueeEnabled && (
+          <div className="relative z-10 mt-14 w-full max-w-[1200px] px-6 sm:px-8">
+            <MarqueeText text={marqueeText} durationSec={marqueeSpeed} />
+          </div>
+        )}
       </section>
 
       {/* 主页产品分类（首屏下第一块，非顶部导航） */}
@@ -101,6 +143,13 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* 首页自定义 Sections（来自 Strapi，可拖拽排序） */}
+      {homeSections.length > 0 && (
+        <section className="border-t border-black/6 py-20">
+          <ProductSections sections={homeSections} />
+        </section>
+      )}
 
       {/* 关于我们 - 大留白、细字、简洁 */}
       <section className="border-t border-black/8 bg-white">

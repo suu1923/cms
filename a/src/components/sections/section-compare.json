@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_sections_section_compares",
+  "info": {
+    "displayName": "对比表"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "columnA": {
+      "type": "string",
+      "default": "方案 A"
+    },
+    "columnB": {
+      "type": "string",
+      "default": "方案 B"
+    },
+    "rows": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-compare-row"
+    }
+  }
+}
+

@@ -9,12 +9,35 @@ import type { AboutContent, HomeHero, SiteConfig } from "@/types/content";
 
 const CMS_BASE_URL = process.env.CMS_BASE_URL;
 const CMS_TOKEN = process.env.CMS_TOKEN;
+/** 可选：OSS 自定义域名（如 https://cdn.xxx.com），用于把默认 OSS 域名替换成自定义域名，便于浏览器内预览、避免强制下载。见阿里云文档：https://help.aliyun.com/zh/oss/how-to-ensure-an-object-is-previewed-when-you-access-the-object */
+const CMS_OSS_CUSTOM_DOMAIN = process.env.CMS_OSS_CUSTOM_DOMAIN;
+
+/**
+ * 服务端：来自 CMS_BASE_URL。
+ * 浏览器里的客户端组件读不到 CMS_BASE_URL，需配置其一：
+ * - NEXT_PUBLIC_CMS_ORIGIN（推荐，如 https://cms.example.com）
+ * - NEXT_PUBLIC_CMS_BASE_URL（如 https://cms.example.com/api，会自动去掉 /api）
+ */
+const CMS_PUBLIC_ORIGIN = (() => {
+  const o = process.env.NEXT_PUBLIC_CMS_ORIGIN?.trim();
+  if (o) return o.replace(/\/+$/, "");
+  const api = process.env.NEXT_PUBLIC_CMS_BASE_URL?.trim();
+  if (api) return api.replace(/\/api\/?$/, "").replace(/\/+$/, "");
+  return "";
+})();
 
 function getCmsOrigin() {
   const base = CMS_BASE_URL ?? "";
   // 常见配置：CMS_BASE_URL=http://host:1337/api
   // 媒体 URL 多为 /uploads/...，需要拼到 origin（去掉 /api）
   return base.replace(/\/api\/?$/, "");
+}
+
+/** 解析媒体相对路径时优先用服务端 origin，否则用 NEXT_PUBLIC_*（供客户端组件使用） */
+function getMediaOrigin(): string {
+  const fromServer = getCmsOrigin().trim();
+  if (fromServer) return fromServer;
+  return CMS_PUBLIC_ORIGIN;
 }
 
 function joinUrl(base: string, path: string) {
@@ -42,7 +65,13 @@ async function fetchFromCMS<T>(path: string): Promise<T | null> {
   }
 
   if (!res.ok) {
-    console.error("[CMS] 请求失败", res.status, res.statusText, url);
+    let body: string | undefined;
+    try {
+      body = await res.text();
+    } catch {
+      body = undefined;
+    }
+    console.error("[CMS] 请求失败", res.status, res.statusText, url, body ? `body=${body}` : "");
     return null;
   }
 
@@ -59,7 +88,20 @@ export async function getSiteFromCMS(): Promise<SiteConfig | null> {
 
 /** 从 CMS 读取关于我们内容（Strapi 单类型 GET /api/about） */
 export async function getAboutFromCMS(): Promise<AboutContent | null> {
-  return fetchFromCMS<AboutContent>("/about");
+  const populateSections = [
+    "populate[sections][on][sections.section-horizontal-gallery][populate]=*",
+    "populate[sections][on][sections.section-lateral-pin-indicator][populate]=*",
+    "populate[sections][on][sections.section-carousel][populate]=*",
+    "populate[sections][on][sections.section-grid][populate]=*",
+    "populate[sections][on][sections.section-split][populate]=*",
+    "populate[sections][on][sections.section-split-gallery][populate]=*",
+    "populate[sections][on][sections.section-faq][populate]=*",
+    "populate[sections][on][sections.section-rich-text][populate]=*",
+    "populate[sections][on][sections.section-compare][populate]=*",
+    "populate[sections][on][sections.section-timeline][populate]=*",
+    "populate[sections][on][sections.section-sticky-story][populate]=*",
+  ].join("&");
+  return fetchFromCMS<AboutContent>(`/about?${populateSections}`);
 }
 
 // ---------------- 站点（site）---------------
@@ -70,6 +112,10 @@ export interface SiteFromCMS {
   code?: string;
   title?: string;
   description?: string;
+  logo?: unknown;
+  logoDark?: unknown;
+  favicon?: unknown;
+  appleTouchIcon?: unknown;
   icp?: string;
   copyright?: string;
   address?: string;
@@ -79,6 +125,10 @@ export interface SiteFromCMS {
     code?: string;
     title?: string;
     description?: string;
+    logo?: unknown;
+    logoDark?: unknown;
+    favicon?: unknown;
+    appleTouchIcon?: unknown;
     icp?: string;
     copyright?: string;
     address?: string;
@@ -102,6 +152,83 @@ export function getSiteI18nEnabled(site: SiteFromCMS | null): boolean {
   return Boolean(a.i18nEnabled);
 }
 
+// ---------------- Footer（联系人/友链/第三方联系方式）---------------
+
+export interface ContactInfoFromCMS {
+  id: number;
+  label?: string;
+  value?: string;
+  href?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  attributes?: {
+    label?: string;
+    value?: string;
+    href?: string;
+    sortOrder?: number;
+    isActive?: boolean;
+  };
+}
+
+export interface FriendLinkFromCMS {
+  id: number;
+  name?: string;
+  url?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  attributes?: {
+    name?: string;
+    url?: string;
+    sortOrder?: number;
+    isActive?: boolean;
+  };
+}
+
+export interface ThirdPartyContactFromCMS {
+  id: number;
+  name?: string;
+  url?: string;
+  qrcode?: unknown;
+  sortOrder?: number;
+  isActive?: boolean;
+  attributes?: {
+    name?: string;
+    url?: string;
+    qrcode?: unknown;
+    sortOrder?: number;
+    isActive?: boolean;
+  };
+}
+
+export async function getContactInfosFromCMS(siteCode?: string): Promise<ContactInfoFromCMS[]> {
+  const code = siteCode || process.env.CMS_SITE_CODE || "";
+  const filters = code ? `&filters[site][code][$eq]=${encodeURIComponent(code)}` : "";
+  const list = await fetchFromCMS<ContactInfoFromCMS[]>(
+    `/contact-infos?filters[isActive][$eq]=true${filters}&sort=sortOrder:asc`,
+  );
+  return Array.isArray(list) ? list : [];
+}
+
+export async function getFriendLinksFromCMS(siteCode?: string): Promise<FriendLinkFromCMS[]> {
+  const code = siteCode || process.env.CMS_SITE_CODE || "";
+  const filters = code ? `&filters[site][code][$eq]=${encodeURIComponent(code)}` : "";
+  const list = await fetchFromCMS<FriendLinkFromCMS[]>(
+    `/friend-links?filters[isActive][$eq]=true${filters}&sort=sortOrder:asc`,
+  );
+  return Array.isArray(list) ? list : [];
+}
+
+export async function getThirdPartyContactsFromCMS(
+  siteCode?: string,
+): Promise<ThirdPartyContactFromCMS[]> {
+  const code = siteCode || process.env.CMS_SITE_CODE || "";
+  const filters = code ? `&filters[site][code][$eq]=${encodeURIComponent(code)}` : "";
+  const list = await fetchFromCMS<ThirdPartyContactFromCMS[]>(
+    `/third-party-contacts?populate[qrcode]=true&filters[isActive][$eq]=true${filters}&sort=sortOrder:asc`,
+  );
+  return Array.isArray(list) ? list : [];
+}
+
 // ---------------- 首页封面（home-hero）---------------
 
 export interface HomeHeroFromCMS {
@@ -122,6 +249,7 @@ export interface HomeHeroFromCMS {
   ctaHref?: string;
   sortOrder?: number;
   isActive?: boolean;
+  coverHeightMode?: "full" | "two_thirds";
 }
 
 export interface HomeHeroAttrs {
@@ -129,6 +257,7 @@ export interface HomeHeroAttrs {
   subtitle?: string;
   image?: unknown;
   video?: unknown;
+  coverHeightMode?: "full" | "two_thirds";
   isTop?: boolean;
   marqueeText?: string;
   marqueeEnabled?: boolean;
@@ -148,6 +277,7 @@ function getHomeHeroAttrs(entry: HomeHeroFromCMS): HomeHeroAttrs {
     subtitle: entry.subtitle,
     image: entry.image,
     video: entry.video,
+    coverHeightMode: entry.coverHeightMode,
     isTop: entry.isTop,
     marqueeText: entry.marqueeText,
     marqueeEnabled: entry.marqueeEnabled,
@@ -178,11 +308,14 @@ export function homeHeroFromCMSFallback(local: HomeHero, cms: HomeHeroFromCMS | 
   if (!cms) return local;
   const a = getHomeHeroAttrs(cms);
   const media = getStrapiMediaUrl(a.video) || getStrapiMediaUrl(a.image);
+  const height: HomeHero["coverHeightMode"] =
+    a.coverHeightMode === "two_thirds" ? "two_thirds" : "full";
   return {
     title: a.title || local.title,
     subtitle: a.subtitle || local.subtitle,
     backgroundImage: media || local.backgroundImage,
     cta: a.ctaLabel && a.ctaHref ? [{ label: a.ctaLabel, href: a.ctaHref }] : local.cta,
+    coverHeightMode: height,
   };
 }
 
@@ -192,10 +325,12 @@ export interface HomePageFromCMS {
   id: number;
   site?: unknown;
   isActive?: boolean;
+  coverHero?: unknown;
   sections?: unknown[];
   attributes?: {
     site?: unknown;
     isActive?: boolean;
+    coverHero?: unknown;
     sections?: unknown[];
   };
 }
@@ -203,11 +338,43 @@ export interface HomePageFromCMS {
 export async function getHomePageFromCMS(siteCode?: string): Promise<HomePageFromCMS | null> {
   const code = siteCode || process.env.CMS_SITE_CODE || "";
   const filters = code ? `&filters[site][code][$eq]=${encodeURIComponent(code)}` : "";
+  /**
+   * Strapi 5：根级 `populate=*` 与 dynamic zone 的深层 populate 策略不兼容，
+   * 混用会导致 sections 内组件的 relation（如产品展示的 products）进不了响应，
+   * 前端 SectionProductShowcase 因 items 为空整段不渲染。
+   * 必须为 dynamic zone 里每一种组件单独写 `populate[sections][on][...]`。
+   * @see https://docs.strapi.io/cms/api/rest/guides/understanding-populate#populate-dynamic-zones
+   */
+  const populateSections = [
+    "populate[coverHero][populate]=*",
+    "populate[sections][on][sections.section-product-categories][populate]=*",
+    "populate[sections][on][sections.section-product-showcase][populate]=*",
+    "populate[sections][on][sections.section-split-gallery][populate]=*",
+    "populate[sections][on][sections.section-carousel][populate]=*",
+    "populate[sections][on][sections.section-grid][populate]=*",
+    "populate[sections][on][sections.section-split][populate]=*",
+    "populate[sections][on][sections.section-faq][populate]=*",
+    "populate[sections][on][sections.section-rich-text][populate]=*",
+    "populate[sections][on][sections.section-compare][populate]=*",
+    "populate[sections][on][sections.section-timeline][populate]=*",
+    "populate[sections][on][sections.section-sticky-story][populate]=*",
+  ].join("&");
+
   const list = await fetchFromCMS<HomePageFromCMS[]>(
-    `/home-pages?populate=*&filters[isActive][$eq]=true${filters}&pagination[pageSize]=1`,
+    `/home-pages?filters[isActive][$eq]=true${filters}&pagination[pageSize]=1&${populateSections}`,
   );
-  if (!list || !Array.isArray(list) || list.length === 0) return null;
-  return list[0] ?? null;
+  if (list && Array.isArray(list) && list.length > 0) return list[0] ?? null;
+
+  // 若按站点 code 未命中，兜底取一条启用首页，避免因站点配置不一致导致首页模块空白
+  if (filters) {
+    const fallbackList = await fetchFromCMS<HomePageFromCMS[]>(
+      `/home-pages?filters[isActive][$eq]=true&pagination[pageSize]=1&${populateSections}`,
+    );
+    if (fallbackList && Array.isArray(fallbackList) && fallbackList.length > 0) {
+      return fallbackList[0] ?? null;
+    }
+  }
+  return null;
 }
 
 export function getHomePageSections(home: HomePageFromCMS | null): unknown[] {
@@ -216,9 +383,44 @@ export function getHomePageSections(home: HomePageFromCMS | null): unknown[] {
   return (a.sections ?? []) as unknown[];
 }
 
+export function getHomePageCoverHero(home: HomePageFromCMS | null): unknown | null {
+  if (!home) return null;
+  const a = home.attributes ?? home;
+  return (a.coverHero ?? null) as unknown | null;
+}
+
+export interface ProductCategoryFromCMS {
+  id: number;
+  name?: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  cover?: unknown;
+  attributes?: {
+    name?: string;
+    slug?: string;
+    summary?: string;
+    description?: string;
+    cover?: unknown;
+  };
+}
+
+export async function getProductCategoriesFromCMS(
+  siteCode?: string,
+): Promise<ProductCategoryFromCMS[]> {
+  const code = siteCode || process.env.CMS_SITE_CODE || "";
+  const filters = code ? `&filters[site][code][$eq]=${encodeURIComponent(code)}` : "";
+  const list = await fetchFromCMS<ProductCategoryFromCMS[]>(
+    `/product-categories?populate[cover]=true&filters[publishedAt][$notNull]=true${filters}&sort=name:asc`,
+  );
+  return Array.isArray(list) ? list : [];
+}
+
 // ---------------- 产品（对接 Strapi collectionType: product）---------------
 
 interface ProductParameter {
+  group?: string;
+  isFeatured?: boolean;
   key: string;
   value: string;
 }
@@ -232,76 +434,231 @@ interface ProductModule {
 
 export interface ProductFromCMS {
   id: number;
-  attributes: {
-    name: string;
-    slug: string;
-    summary?: string;
+  // Strapi v4 常见形状：{ id, attributes: {...} }
+  attributes?: ProductAttrs;
+  // Strapi v5/不同返回设置下可能是扁平：{ id, name, slug, ... }
+  name?: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  cover?: unknown;
+  detailHeroImage?: unknown;
+  coverVideo?: unknown;
+  enableSpecialCover?: boolean;
+  coverGallery?: unknown;
+  coverHeightMode?: "h_2_3" | "h_full";
+  coverTextPosition?: "pos_left_center" | "pos_center" | "pos_left_bottom";
+  coverTextSize?: "size_s" | "size_m" | "size_l";
+  coverTextColor?: string;
+  enableContinuousTextOnlyDisplay?: boolean;
+  panorama360?: {
+    enabled?: boolean;
+    title?: string;
     description?: string;
-    cover?: unknown;
-    hasPanorama360?: boolean;
-    isCoverVideo?: boolean;
-    parameters?: ProductParameter[];
-    modules?: ProductModule[];
-    sections?: unknown[];
-    seo_title?: string;
-    seo_description?: string;
-    keywords?: string;
+    background?: {
+      backgroundVideo?: unknown;
+      backgroundImage?: unknown;
+      backgroundColor?: string;
+      heightMode?:
+        | "跟随内容"
+        | "当前屏幕高度"
+        | "当前屏幕高度的2/3"
+        | "当前屏幕高度的1/2"
+        | "当前屏幕高度的1/3";
+    };
+  };
+  parameters?: ProductParameter[];
+  modules?: ProductModule[];
+  sections?: unknown[];
+  seo_title?: string;
+  seo_description?: string;
+  keywords?: string;
+}
+
+export interface ProductAttrs {
+  name: string;
+  slug: string;
+  summary?: string;
+  description?: string;
+  cover?: unknown;
+  detailHeroImage?: unknown;
+  coverVideo?: unknown;
+  enableSpecialCover?: boolean;
+  coverGallery?: unknown;
+  coverHeightMode?: "h_2_3" | "h_full";
+  coverTextPosition?: "pos_left_center" | "pos_center" | "pos_left_bottom";
+  coverTextSize?: "size_s" | "size_m" | "size_l";
+  coverTextColor?: string;
+  enableContinuousTextOnlyDisplay?: boolean;
+  panorama360?: {
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    background?: {
+      backgroundVideo?: unknown;
+      backgroundImage?: unknown;
+      backgroundColor?: string;
+      heightMode?:
+        | "跟随内容"
+        | "当前屏幕高度"
+        | "当前屏幕高度的2/3"
+        | "当前屏幕高度的1/2"
+        | "当前屏幕高度的1/3";
+    };
+  };
+  parameters?: ProductParameter[];
+  modules?: ProductModule[];
+  sections?: unknown[];
+  seo_title?: string;
+  seo_description?: string;
+  keywords?: string;
+}
+
+export function getProductAttrs(entry: ProductFromCMS): ProductAttrs {
+  if (entry.attributes && typeof entry.attributes === "object") {
+    return entry.attributes as ProductAttrs;
+  }
+  return {
+    name: entry.name ?? "",
+    slug: entry.slug ?? "",
+    summary: entry.summary,
+    description: entry.description,
+    cover: entry.cover,
+    detailHeroImage: entry.detailHeroImage,
+    coverVideo: entry.coverVideo,
+    enableSpecialCover: entry.enableSpecialCover,
+    coverGallery: entry.coverGallery,
+    coverHeightMode: entry.coverHeightMode,
+    coverTextPosition: entry.coverTextPosition,
+    coverTextSize: entry.coverTextSize,
+    coverTextColor: entry.coverTextColor,
+    enableContinuousTextOnlyDisplay: entry.enableContinuousTextOnlyDisplay,
+    panorama360: entry.panorama360,
+    parameters: entry.parameters,
+    modules: entry.modules,
+    sections: entry.sections,
+    seo_title: entry.seo_title,
+    seo_description: entry.seo_description,
+    keywords: entry.keywords,
   };
 }
 
 /** 根据 slug 从 CMS 里取产品详情（Strapi: GET /products?filters[slug][$eq]=...） */
 export async function getProductFromCMSBySlug(slug: string): Promise<ProductFromCMS | null> {
-  const list = await fetchFromCMS<ProductFromCMS[]>(
-    `/products?populate=*&filters[slug][$eq]=${encodeURIComponent(slug)}`,
-  );
-
-  if (!list || !Array.isArray(list) || list.length === 0) {
-    return null;
-  }
-
-  return list[0] ?? null;
+  // 使用自定义接口：避免 Content API URL populate 在 dynamiczone 深层 media populate 时触发 500
+  return fetchFromCMS<ProductFromCMS>(`/products/detailed/${encodeURIComponent(slug)}`);
 }
 
 /** 从 CMS 取全部已发布产品列表（用于产品中心列表页） */
 export async function getProductsFromCMS(): Promise<ProductFromCMS[]> {
   const list = await fetchFromCMS<ProductFromCMS[]>(
-    "/products?populate[cover]=*&publicationState=live",
+    "/products?populate[cover]=true&publicationState=live",
   );
   return Array.isArray(list) ? list : [];
+}
+
+/** 把解析出的 URL 若为默认 OSS 域名则替换为自定义域名，便于预览（见阿里云文档：自定义域名可避免强制下载） */
+function applyOssCustomDomain(url: string): string {
+  if (!url || !CMS_OSS_CUSTOM_DOMAIN) return url;
+  const customOrigin = CMS_OSS_CUSTOM_DOMAIN.replace(/\/$/, "");
+  // 默认 OSS 域名（当前项目 bucket）
+  const defaultOssHost = "yuyi-cms.oss-cn-qingdao.aliyuncs.com";
+  if (url.includes(defaultOssHost)) {
+    return url.replace(new RegExp(`https?://${defaultOssHost.replace(/\./g, "\\.")}`), customOrigin);
+  }
+  return url;
 }
 
 /** 从 Strapi media 字段中解析出可用的 URL（图片或视频） */
 export function getStrapiMediaUrl(media: unknown): string | null {
   if (!media) return null;
 
-  // Strapi v4 media: { data: { attributes: { url } } }
-  if (typeof media === "object" && "data" in (media as object)) {
-    const d = (media as { data?: { attributes?: { url?: string } } }).data;
-    const url = d?.attributes?.url;
-    if (url) {
-      if (url.startsWith("http")) return url;
-      const origin = getCmsOrigin();
-      return origin ? `${origin}${url}` : url;
+  // 兼容数组媒体（某些接口/版本可能返回数组，即便字段是 single）
+  if (Array.isArray(media)) {
+    for (const item of media) {
+      const url = getStrapiMediaUrl(item);
+      if (url) return url;
     }
+    return null;
   }
 
+  let resolved: string | null = null;
+  const withOrigin = (urlLike: string): string => {
+    if (urlLike.startsWith("http://") || urlLike.startsWith("https://")) return urlLike;
+    if (/^[\w.-]+\.[\w.-]+\/.+/.test(urlLike)) return `https://${urlLike}`;
+    const origin = getMediaOrigin();
+    if (origin) return `${origin}${urlLike}`;
+    // 浏览器端无 CMS origin 时，走服务端 proxy（由 CMS_BASE_URL 拼接真实源站）
+    if (urlLike.startsWith("/")) {
+      return `/api/media-proxy?path=${encodeURIComponent(urlLike)}`;
+    }
+    return urlLike;
+  };
+
+  // Strapi v4：{ data: { attributes: { url } } }；Strapi v5 常见：{ data: { url } }（无 attributes）
+  if (typeof media === "object" && "data" in (media as object)) {
+    const d = (media as { data?: unknown }).data;
+    const origin = getMediaOrigin();
+
+    const pickUrlFromEntry = (entry: unknown): string | undefined => {
+      if (!entry || typeof entry !== "object") return undefined;
+      const e = entry as Record<string, unknown>;
+      const fromAttrs =
+        e.attributes && typeof e.attributes === "object"
+          ? (e.attributes as { url?: string }).url
+          : undefined;
+      const direct = typeof e.url === "string" ? e.url : undefined;
+      return fromAttrs ?? direct;
+    };
+
+    if (Array.isArray(d)) {
+      for (const item of d) {
+        const url = pickUrlFromEntry(item);
+        if (url) {
+          resolved = url.startsWith("http") ? url : origin ? `${origin}${url}` : withOrigin(url);
+          break;
+        }
+      }
+    } else if (d && typeof d === "object") {
+      const url = pickUrlFromEntry(d);
+      if (url) {
+        resolved = url.startsWith("http") ? url : origin ? `${origin}${url}` : withOrigin(url);
+      }
+    }
+  }
   // Strapi v5 populate=* 常见 media：直接是文件对象，带 url
-  if (typeof media === "object" && "url" in (media as object)) {
+  else if (typeof media === "object" && "url" in (media as object)) {
     const url = (media as { url?: unknown }).url;
     if (typeof url === "string" && url.length > 0) {
-      if (url.startsWith("http")) return url;
-      const origin = getCmsOrigin();
-      return origin ? `${origin}${url}` : url;
+      resolved = withOrigin(url);
+    }
+  }
+  // 兜底：字符串
+  else if (typeof media === "string" && media.length > 0) {
+    resolved = withOrigin(media);
+  }
+
+  return resolved ? applyOssCustomDomain(resolved) : null;
+}
+
+export function getStrapiMediaUrls(media: unknown): string[] {
+  if (!media) return [];
+  if (Array.isArray(media)) {
+    return media
+      .map((item) => getStrapiMediaUrl(item))
+      .filter((u): u is string => Boolean(u));
+  }
+
+  if (typeof media === "object" && media && "data" in media) {
+    const d = (media as { data?: unknown }).data;
+    if (Array.isArray(d)) {
+      return d
+        .map((item) => getStrapiMediaUrl(item))
+        .filter((u): u is string => Boolean(u));
     }
   }
 
-  // 兜底：字符串
-  if (typeof media === "string" && media.length > 0) {
-    if (media.startsWith("http")) return media;
-    const origin = getCmsOrigin();
-    return origin ? `${origin}${media}` : media;
-  }
-
-  return null;
+  const single = getStrapiMediaUrl(media);
+  return single ? [single] : [];
 }
 

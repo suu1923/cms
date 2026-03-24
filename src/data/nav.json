@@ -1,7 +1,7 @@
 [
   { "label": "首页", "href": "/" },
   {
-    "label": "产品中心",
+    "label": "产品类型",
     "href": "/products",
     "children": [
       { "label": "游艇", "href": "/products/youting" },

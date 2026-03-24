@@ -39,6 +39,7 @@ export interface ProductCategory {
   id: string;
   name: string;
   slug: string;
+  image?: string;
   products?: ProductItem[];
 }
 
@@ -54,6 +55,10 @@ export interface AboutContent {
   summary: string;
   body: string[];
   stats?: { label: string; value: string }[];
+  sections?: unknown[];
+  seo_title?: string;
+  seo_description?: string;
+  keywords?: string;
 }
 
 export interface HomeHero {
@@ -61,4 +66,6 @@ export interface HomeHero {
   subtitle: string;
   backgroundImage: string;
   cta?: { label: string; href: string }[];
+  /** 与 Strapi 封面高度一致：满屏或约 2/3 屏 */
+  coverHeightMode?: "full" | "two_thirds";
 }

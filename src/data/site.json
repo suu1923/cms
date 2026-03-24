@@ -12,7 +12,13 @@
     "copyright": "© 2026 山东航宇游艇发展有限公司",
     "icp": "鲁ICP备17038766",
     "links": [
-      { "label": "山东宇易科技股份有限公司", "href": "#" }
+      { "label": "山东宇易科技股份有限公司", "href": "https://www.yuyigufen.com/" },
+      { "label": "中国船舶工业行业协会", "href": "https://www.cansi.org.cn/" },
+      { "label": "中国交通运输部", "href": "https://www.mot.gov.cn/" },
+      { "label": "中国海事局", "href": "https://www.msa.gov.cn/" },
+      { "label": "山东省工业和信息化厅", "href": "http://gxt.shandong.gov.cn/" },
+      { "label": "济宁市人民政府", "href": "http://www.jining.gov.cn/" },
+      { "label": "微山县人民政府", "href": "http://www.weishan.gov.cn/" }
     ]
   }
 }

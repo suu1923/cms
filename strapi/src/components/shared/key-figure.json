@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_shared_key_figures",
+  "info": {
+    "displayName": "关键数据项"
+  },
+  "attributes": {
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "collectionName": "components_sections_section_split_galleries",
+  "info": {
+    "displayName": "分屏图文增强"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "text"
+    },
+    "layoutMode": {
+      "type": "enumeration",
+      "enum": ["左图右文本", "右图左文本", "上文下图"],
+      "default": "左图右文本"
+    },
+    "enableCarouselInTopBottom": {
+      "type": "boolean",
+      "default": false
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": false
+    },
+    "imageRounded": {
+      "type": "boolean",
+      "default": true
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"]
+    },
+    "stats": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.key-figure"
+    },
+    "actions": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.link-action"
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_shared_link_actions",
+  "info": {
+    "displayName": "按钮配置"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "href": {
+      "type": "string",
+      "required": true
+    },
+    "variant": {
+      "type": "enumeration",
+      "enum": ["solid", "outline", "link"],
+      "default": "outline"
+    },
+    "openInNewTab": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

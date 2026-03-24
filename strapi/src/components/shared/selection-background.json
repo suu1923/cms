@@ -1,0 +1,38 @@
+{
+  "collectionName": "components_shared_selection_backgrounds",
+  "info": {
+    "displayName": "Selection 背景（视频 / 图片 / 颜色）"
+  },
+  "attributes": {
+    "backgroundColor": {
+      "type": "customField",
+      "customField": "global::selection-background-color",
+      "default": "rgba(0,0,0,0.04)"
+    },
+    "heightMode": {
+      "type": "enumeration",
+      "enum": [
+        "跟随内容",
+        "当前屏幕高度",
+        "当前屏幕高度的2/3",
+        "当前屏幕高度的1/2",
+        "当前屏幕高度的1/3"
+      ],
+      "default": "跟随内容",
+      "description": "高度模式：跟随内容 / 当前屏幕高度（100vh）"
+    },
+    "backgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "只能二选一：图片 或 视频。填写了视频时优先使用视频。"
+    },
+    "backgroundVideo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["videos"],
+      "description": "只能二选一：视频 或 图片。若两者都有，前端按视频优先渲染。"
+    }
+  }
+}
+

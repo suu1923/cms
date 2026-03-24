@@ -1,0 +1,61 @@
+{
+  "kind": "singleType",
+  "collectionName": "abouts",
+  "info": {
+    "singularName": "about",
+    "pluralName": "abouts",
+    "displayName": "关于我们"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site"
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "text",
+      "required": true
+    },
+    "body": {
+      "type": "json"
+    },
+    "stats": {
+      "type": "json"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "sections.section-horizontal-gallery",
+        "sections.section-lateral-pin-indicator",
+        "sections.section-carousel",
+        "sections.section-grid",
+        "sections.section-split",
+        "sections.section-split-gallery",
+        "sections.section-faq",
+        "sections.section-rich-text",
+        "sections.section-compare",
+        "sections.section-timeline",
+        "sections.section-sticky-story"
+      ]
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "text"
+    },
+    "keywords": {
+      "type": "string"
+    }
+  }
+}

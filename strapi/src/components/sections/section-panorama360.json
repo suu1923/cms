@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_sections_section_panorama360s",
+  "info": {
+    "displayName": "360° 全景（Selection）"
+  },
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "title": {
+      "type": "string",
+      "default": "360° 全景"
+    },
+    "description": {
+      "type": "text"
+    },
+    "media": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "videos"
+      ]
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

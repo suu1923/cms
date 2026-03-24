@@ -1,0 +1,43 @@
+{
+  "collectionName": "components_sections_section_product_showcases",
+  "info": {
+    "displayName": "产品展示"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "产品展示"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "maxItems": {
+      "type": "integer",
+      "default": 4,
+      "min": 1,
+      "max": 6
+    },
+    "primaryCtaLabel": {
+      "type": "string",
+      "default": "了解更多"
+    },
+    "secondaryCtaLabel": {
+      "type": "string",
+      "default": "立即购买"
+    },
+    "secondaryCtaHref": {
+      "type": "string",
+      "description": "第二按钮链接（如咨询页、外链）。留空则默认指向「关于我们」页。"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product"
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}

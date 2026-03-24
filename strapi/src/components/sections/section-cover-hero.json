@@ -1,0 +1,54 @@
+{
+  "collectionName": "components_sections_section_cover_heros",
+  "info": {
+    "displayName": "首页封面"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "video": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["videos"]
+    },
+    "coverHeightMode": {
+      "type": "enumeration",
+      "enum": ["full", "two_thirds"],
+      "default": "full",
+      "description": "封面区域高度：满屏或屏幕高度的约 2/3"
+    },
+    "marqueeText": {
+      "type": "string"
+    },
+    "marqueeEnabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "marqueeSpeed": {
+      "type": "integer",
+      "default": 28
+    },
+    "ctaLabel": {
+      "type": "string"
+    },
+    "ctaHref": {
+      "type": "string"
+    },
+    "ctaLabel2": {
+      "type": "string"
+    },
+    "ctaHref2": {
+      "type": "string"
+    }
+  }
+}

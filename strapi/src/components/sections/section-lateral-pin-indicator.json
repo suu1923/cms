@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_sections_section_lateral_pin_indicators",
+  "info": {
+    "displayName": "Lateral Pin Indicator（横向指示滚动）"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-carousel-item"
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": true
+    },
+    "indicatorPosition": {
+      "type": "enumeration",
+      "enum": ["左侧", "下方"],
+      "default": "左侧",
+      "description": "指示器位置：左侧（默认）/ 下方（参考官网参数切换）"
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

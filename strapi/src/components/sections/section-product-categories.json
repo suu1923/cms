@@ -1,0 +1,37 @@
+{
+  "collectionName": "components_sections_section_product_categories",
+  "info": {
+    "displayName": "产品分类"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "产品分类"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "可选；当前前端「产品分类」模块不展示此行，无需填写。"
+    },
+    "titleAlign": {
+      "type": "enumeration",
+      "enum": ["left", "center"],
+      "default": "center"
+    },
+    "stylePreset": {
+      "type": "enumeration",
+      "enum": ["nine-grid", "six-strip"],
+      "default": "nine-grid"
+    },
+    "maxItems": {
+      "type": "integer",
+      "default": 9,
+      "min": 1,
+      "max": 12
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}

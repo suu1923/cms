@@ -1,0 +1,36 @@
+{
+  "collectionName": "components_sections_section_text_onlies",
+  "info": {
+    "displayName": "纯文本"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "text"
+    },
+    "textColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "textPosition": {
+      "type": "enumeration",
+      "enum": [
+        "左上",
+        "左中",
+        "右上",
+        "中上",
+        "居中",
+        "右中"
+      ],
+      "default": "居中",
+      "description": "文本位置：左上 / 左中 / 右上 / 中上 / 居中 / 右中"
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}

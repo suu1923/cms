@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_sections_section_carousels",
+  "info": {
+    "displayName": "横向滑动轮播"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-carousel-item"
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": false
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

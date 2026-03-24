@@ -1,0 +1,126 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "产品"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name"
+    },
+    "summary": {
+      "type": "text"
+    },
+    "description": {
+      "type": "text"
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "required": true
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product-category.product-category",
+      "required": true
+    },
+    "enableSpecialCover": {
+      "type": "boolean",
+      "default": false,
+      "displayName": "启用特殊封面滚动展示"
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "仅选择图片。若同时设置 `coverVideo`，前端会优先使用视频。"
+    },
+    "detailHeroImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "displayName": "产品详情页大图",
+      "description": "仅用于产品详情页顶部大图展示；若已设置则优先使用。"
+    },
+    "coverVideo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["videos"],
+      "description": "仅选择视频。若同时设置 `cover`，前端会优先使用视频。"
+    },
+    "enableContinuousTextOnlyDisplay": {
+      "type": "boolean",
+      "default": false,
+      "description": "开启后：连续纯文本模块会启用 pin + overscroll 的展示效果。",
+      "displayName": "开启连续纯文本展示"
+    },
+    "coverHeightMode": {
+      "type": "enumeration",
+      "enum": ["h_2_3", "h_full"],
+      "default": "h_2_3",
+      "displayName": "封面图高度位置"
+    },
+    "coverTextPosition": {
+      "type": "enumeration",
+      "enum": ["pos_left_center", "pos_center", "pos_left_bottom"],
+      "default": "pos_left_center",
+      "displayName": "封面图文本位置"
+    },
+    "coverTextSize": {
+      "type": "enumeration",
+      "enum": ["size_s", "size_m", "size_l"],
+      "default": "size_m",
+      "displayName": "封面图文本大小"
+    },
+    "coverTextColor": {
+      "type": "string",
+      "default": "#ffffff",
+      "displayName": "封面图文本颜色"
+    },
+    "coverGallery": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"],
+      "displayName": "特殊封面图集"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "sections.section-horizontal-gallery",
+        "sections.section-lateral-pin-indicator",
+        "sections.section-carousel",
+        "sections.section-parameters",
+        "sections.section-panorama360",
+        "sections.section-grid",
+        "sections.section-split",
+        "sections.section-text-only",
+        "sections.section-faq",
+        "sections.section-rich-text",
+        "sections.section-compare",
+        "sections.section-timeline",
+        "sections.section-sticky-story"
+      ]
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "text"
+    },
+    "keywords": {
+      "type": "string"
+    }
+  }
+}

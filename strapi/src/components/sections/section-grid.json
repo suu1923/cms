@@ -1,0 +1,39 @@
+{
+  "collectionName": "components_sections_section_grids",
+  "info": {
+    "displayName": "宫格模块"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "columns": {
+      "type": "enumeration",
+      "enum": ["2", "3"],
+      "default": "3"
+    },
+    "rows": {
+      "type": "integer",
+      "default": 2,
+      "min": 1
+    },
+    "titlePlacement": {
+      "type": "enumeration",
+      "enum": ["in-image", "out-image"],
+      "default": "out-image",
+      "description": "Grid title/description display inside image or outside image"
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-grid-item"
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

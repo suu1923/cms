@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_sections_section_timelines",
+  "info": {
+    "displayName": "时间线/步骤"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-timeline-item"
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

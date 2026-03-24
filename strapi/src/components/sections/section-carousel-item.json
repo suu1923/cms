@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_sections_section_carousel_items",
+  "info": {
+    "displayName": "轮播项"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "caption": {
+      "type": "text"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "media": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"],
+      "description": "单个媒体（图片或视频）。若已设置，将优先于 image。"
+    }
+  }
+}
+

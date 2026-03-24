@@ -1,0 +1,27 @@
+{
+  "collectionName": "components_sections_section_sticky_stories",
+  "info": {
+    "displayName": "Sticky滚动讲故事（GSAP）"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-sticky-story-step"
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": true
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

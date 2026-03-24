@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_sections_section_rich_texts",
+  "info": {
+    "displayName": "富文本（简版）"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "json"
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

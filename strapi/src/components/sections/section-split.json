@@ -1,0 +1,61 @@
+{
+  "collectionName": "components_sections_section_splits",
+  "info": {
+    "displayName": "分屏图文"
+  },
+  "attributes": {
+    "eyebrow": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "text"
+    },
+    "media": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    },
+    "reverse": {
+      "type": "boolean",
+      "default": false
+    },
+    "layout": {
+      "type": "enumeration",
+      "enum": [
+        "左文本右图",
+        "左图右文本"
+      ],
+      "description": "图文左右位置：左文本右图 / 左图右文本。为空时将回退使用 reverse 字段。"
+    },
+    "ratioPreset": {
+      "type": "enumeration",
+      "enum": [
+        "50/50",
+        "40/60",
+        "60/40",
+        "custom"
+      ],
+      "default": "50/50",
+      "description": "图文比例：选择预设或 custom 后手动设置文字占比。"
+    },
+    "customTextPercent": {
+      "type": "string",
+      "default": "50",
+      "description": "当 ratioPreset=custom 时生效。文字占比（0-100），超过会自动在前端进行 clamp。"
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": true
+    }
+    ,
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

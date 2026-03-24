@@ -1,0 +1,60 @@
+{
+  "collectionName": "components_sections_section_horizontal_galleries",
+  "info": {
+    "displayName": "横向幻灯片图库（ScrollTrigger）"
+  },
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "sections.section-carousel-item"
+    },
+    "enableGsap": {
+      "type": "boolean",
+      "default": true
+    },
+    "enablePin": {
+      "type": "boolean",
+      "default": true,
+      "description": "是否启用 pin 固定滚动（制作横向幻灯片效果的关键）。"
+    },
+    "enableSnap": {
+      "type": "boolean",
+      "default": false,
+      "description": "是否启用 snap，让横向位移按“幻灯片”节奏停靠。"
+    },
+    "cardWidthPreset": {
+      "type": "enumeration",
+      "enum": [
+        "33vw",
+        "40vw",
+        "60vw",
+        "100vw",
+        "320px"
+      ],
+      "default": "60vw",
+      "description": "每张卡片宽度预设。"
+    },
+    "cardAspect": {
+      "type": "enumeration",
+      "enum": [
+        "1/1",
+        "4/3"
+      ],
+      "default": "1/1",
+      "description": "卡片图片比例。"
+    },
+    "background": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.selection-background"
+    }
+  }
+}
+

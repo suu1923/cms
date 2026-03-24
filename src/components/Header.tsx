@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { nav } from "@/lib/content";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
@@ -10,6 +11,7 @@ export function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showLocale, setShowLocale] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -23,60 +25,50 @@ export function Header() {
     setShowLocale(process.env.NEXT_PUBLIC_I18N_ENABLED === "true");
   }, []);
 
-  const isOverHero = !scrolled;
+  // 仅首页首屏使用透明叠加态，其它页面/状态统一白底深色，避免白灰背景看不清导航
+  const isOverHero = pathname === "/" && !scrolled && !mobileOpen;
   const mainNav = nav;
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isOverHero
-          ? "bg-transparent text-white"
+          ? "bg-gradient-to-b from-black/45 via-black/15 to-transparent text-white"
           : "bg-white text-black shadow-[0_1px_0_0_rgba(0,0,0,0.06)]"
       }`}
       onMouseLeave={() => setOpenDropdown(null)}
     >
       {/* 顶栏 */}
-      <div className="mx-auto flex h-12 max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-[1560px] items-center justify-between px-5 sm:px-8 lg:px-10">
         <Link
           href="/"
-          className="text-[15px] font-medium tracking-tight"
+          className="text-[17px] font-medium tracking-tight"
         >
           山东航宇游艇
         </Link>
 
         <nav
-          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 md:flex"
+          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 md:flex"
           aria-label="主导航"
         >
           {mainNav.map((item) =>
-            item.label === "产品中心" ? (
-              <Link
-                key={item.label}
-                href="/products"
-                className={`text-[13px] transition ${
-                  isOverHero ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ) : item.children ? (
+            item.children ? (
               <div
                 key={item.label}
                 className="relative"
                 onMouseEnter={() => setOpenDropdown(item.label)}
               >
                 <span
-                  className={`cursor-pointer text-[13px] transition ${
+                  className={`cursor-pointer text-[15px] transition ${
                     isOverHero ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
                   }`}
                 >
                   {item.label}
                 </span>
-                {/* 非「产品中心」的普通下拉 */}
-                {openDropdown === item.label && item.label !== "产品中心" && (
+                {openDropdown === item.label && (
                   <div className="absolute left-0 top-full pt-0.5">
                     <div
-                      className={`min-w-[160px] py-1 ${
+                      className={`min-w-[200px] py-1 ${
                         isOverHero
                           ? "border border-white/15 bg-black/90 backdrop-blur"
                           : "border border-black/8 bg-white shadow-lg"
@@ -86,7 +78,7 @@ export function Header() {
                         <Link
                           key={child.href}
                           href={child.href}
-                          className={`block px-4 py-2.5 text-[13px] transition ${
+                          className={`block px-4 py-2.5 text-[14px] transition ${
                             isOverHero
                               ? "text-white/90 hover:bg-white/10 hover:text-white"
                               : "text-black/80 hover:bg-black/5 hover:text-black"
@@ -103,7 +95,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-[13px] transition ${
+                className={`text-[15px] transition ${
                   isOverHero ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
                 }`}
               >
@@ -126,8 +118,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* 产品中心不再使用下拉大菜单，直接跳转到产品页 */}
-
       {/* 移动端展开菜单 */}
       {mobileOpen && (
         <div
@@ -136,21 +126,10 @@ export function Header() {
           }`}
         >
           {nav.map((item) =>
-            item.label === "产品中心" ? (
-              <Link
-                key={item.label}
-                href="/products"
-                className={`block py-2.5 text-[13px] ${
-                  isOverHero ? "text-white/90" : "text-black/80"
-                }`}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ) : item.children ? (
+            item.children ? (
               <div key={item.label} className="py-2">
                 <span
-                  className={`text-[13px] font-medium ${
+                  className={`text-[15px] font-medium ${
                     isOverHero ? "text-white" : "text-black"
                   }`}
                 >
@@ -161,7 +140,7 @@ export function Header() {
                     <Link
                       key={child.href}
                       href={child.href}
-                      className={`rounded px-3 py-2 text-[13px] ${
+                      className={`rounded px-3 py-2 text-[14px] ${
                         isOverHero
                           ? "bg-white/10 text-white/90"
                           : "bg-black/5 text-black/80"
@@ -177,7 +156,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block py-2.5 text-[13px] ${
+                className={`block py-2.5 text-[14px] ${
                   isOverHero ? "text-white/90" : "text-black/80"
                 }`}
                 onClick={() => setMobileOpen(false)}

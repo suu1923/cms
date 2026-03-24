@@ -13,12 +13,14 @@ const GAP_PX = 16;
 interface ProductCategoryGridProps {
   title: string;
   id: string;
+  categoryImage?: string;
   products: ProductItem[];
 }
 
 export function ProductCategoryGrid({
   title,
   id,
+  categoryImage,
   products,
 }: ProductCategoryGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,6 +109,33 @@ export function ProductCategoryGrid({
 
   return (
     <section id={id} className="scroll-mt-24 w-full py-12 sm:py-16">
+      <div className="mx-auto mb-7 max-w-[1200px] px-6 sm:mb-9 sm:px-8">
+        <div className="relative overflow-hidden rounded-2xl border border-black/[0.08] bg-black/[0.03]">
+          <div className="relative h-[180px] sm:h-[220px]">
+            {categoryImage ? (
+              <Image
+                src={categoryImage}
+                alt={`${title} 分类封面`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 1200px"
+                unoptimized
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-black/[0.08] to-black/[0.02]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-transparent" />
+            <div className="absolute inset-0 flex items-end">
+              <div className="p-6 sm:p-8">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-white/75">Category</p>
+                <h2 className="mt-2 text-3xl font-light tracking-tight text-white sm:text-4xl">
+                  {title}
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="relative w-full overflow-hidden" ref={containerRef}>
         <div
           ref={trackRef}

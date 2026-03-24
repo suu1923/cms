@@ -18,11 +18,11 @@ export const metadata = {
 };
 
 function cmsProductToItem(p: Awaited<ReturnType<typeof getProductsFromCMS>>[number]): ProductItem {
-  const a = p.attributes;
+  const a = p.attributes ?? ({} as NonNullable<typeof p.attributes>);
   return {
     id: String(p.id),
-    name: a.name,
-    slug: a.slug,
+    name: a.name ?? "",
+    slug: a.slug ?? "",
     category: "产品",
     summary: a.summary ?? "",
     description: a.description ?? "",
@@ -63,11 +63,13 @@ export default async function ProductsPage() {
       {categories.map((cat) => {
         const products = getProductsByCategorySlug(cat.slug);
         if (products.length === 0) return null;
+        const categoryImage = cat.image || products[0]?.image || "";
         return (
           <ProductCategoryGrid
             key={cat.id}
             id={cat.slug}
             title={cat.name}
+            categoryImage={categoryImage}
             products={products}
           />
         );

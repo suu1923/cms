@@ -2,17 +2,25 @@ import { about, site } from "@/lib/content";
 import { getAboutFromCMS, getSiteFromCMS } from "@/lib/cmsClient";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ProductSections, type ProductSection } from "@/components/sections";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "关于我们 | 山东航宇游艇",
-  description: about.summary,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const remoteAbout = await getAboutFromCMS();
+  const data = remoteAbout ?? about;
+  return {
+    title: data.seo_title || "关于我们 | 山东航宇游艇",
+    description: data.seo_description || data.summary,
+    keywords: data.keywords || undefined,
+  };
+}
 
 export default async function AboutPage() {
   // 优先从 Strapi 读取，没有则用本地 JSON
   const [remoteAbout, remoteSite] = await Promise.all([getAboutFromCMS(), getSiteFromCMS()]);
   const aboutData = remoteAbout ?? about;
   const siteData = remoteSite ?? site;
+  const aboutSections = (aboutData.sections ?? []) as ProductSection[];
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -46,6 +54,13 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
+
+      {/* 关于页可配置 Sections（来自 Strapi） */}
+      {aboutSections.length > 0 && (
+        <section className="border-y border-black/6 py-16 sm:py-20">
+          <ProductSections sections={aboutSections} />
+        </section>
+      )}
 
       {/* 数据条 */}
       {aboutData.stats && aboutData.stats.length > 0 && (

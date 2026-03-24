@@ -10,17 +10,24 @@ import {
 } from "@/lib/content";
 import {
   getProductFromCMSBySlug,
+  getProductAttrs,
   getStrapiMediaUrl,
+  getStrapiMediaUrls,
   type ProductFromCMS,
 } from "@/lib/cmsClient";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { ProductSections, type ProductSection } from "@/components/sections/ProductSections";
+import { ProductSections, type ProductSection } from "@/components/sections";
+import { ProductBentoCover } from "@/components/ProductBentoCover";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+// 允许 Strapi 动态内容的 slug：即便不在本地 products.json 里，也能按需渲染并从 CMS 拉取
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const categories = getAllCategorySlugs();
@@ -37,7 +44,7 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: `${category.name} | 产品中心 | 山东航宇游艇` };
   }
   if (productFromCMS) {
-    const attrs = productFromCMS.attributes;
+    const attrs = getProductAttrs(productFromCMS);
     return {
       title: attrs.seo_title || `${attrs.name} | 产品中心 | 山东航宇游艇`,
       description: attrs.seo_description || attrs.summary || undefined,
@@ -187,89 +194,186 @@ export default async function ProductsSlugPage({ params }: PageProps) {
 }
 
 function ProductDetailCMS({ product }: { product: ProductFromCMS }) {
-  const attrs = product.attributes;
-  const coverUrl = getStrapiMediaUrl(attrs.cover);
-  const isVideo = attrs.isCoverVideo && coverUrl;
+  const attrs = getProductAttrs(product);
+  const coverImageUrl = getStrapiMediaUrl(attrs.cover);
+  const detailHeroImageUrl = getStrapiMediaUrl(attrs.detailHeroImage);
+  const coverVideoUrl = getStrapiMediaUrl(attrs.coverVideo);
+  const coverGalleryUrls = getStrapiMediaUrls(attrs.coverGallery);
+  const enableSpecialCover = attrs.enableSpecialCover === true && coverGalleryUrls.length >= 3;
+  // 覆盖展示级别：
+  // 1) 若设置「产品详情页大图」则详情页优先用它（图片）
+  // 2) 否则沿用原规则：视频 > 图片
+  const coverUrl = detailHeroImageUrl || coverVideoUrl || coverImageUrl;
+  const isVideo = !detailHeroImageUrl && Boolean(coverVideoUrl);
+  const coverHeightClass =
+    attrs.coverHeightMode === "h_full"
+      ? "h-[100vh] min-h-[560px]"
+      : "h-[66.667vh] min-h-[420px] sm:min-h-[520px]";
+  const coverTextPosition = attrs.coverTextPosition ?? "pos_left_center";
+  const coverTextColor = attrs.coverTextColor?.trim() ? attrs.coverTextColor : "#ffffff";
+  const coverTextSize = attrs.coverTextSize ?? "size_m";
+  const coverTitleClass =
+    coverTextSize === "size_l"
+      ? "text-5xl font-light tracking-tight sm:text-6xl"
+      : coverTextSize === "size_s"
+        ? "text-3xl font-light tracking-tight sm:text-4xl"
+        : "text-4xl font-light tracking-tight sm:text-5xl";
+  const coverSummaryClass =
+    coverTextSize === "size_l"
+      ? "mt-5 text-[19px] leading-relaxed"
+      : coverTextSize === "size_s"
+        ? "mt-4 text-[15px] leading-relaxed"
+        : "mt-5 text-[17px] leading-relaxed";
+  const coverOverlayAlignClass =
+    coverTextPosition === "pos_center"
+      ? "items-center justify-center text-center"
+      : coverTextPosition === "pos_left_bottom"
+        ? "items-end justify-start pb-12 sm:pb-16"
+        : "items-center justify-start";
   const parameters = attrs.parameters ?? [];
   const modules = attrs.modules ?? [];
   const sections = (attrs.sections ?? []) as ProductSection[];
+  const enableContinuousTextOnlyDisplay = attrs.enableContinuousTextOnlyDisplay === true;
+  const panorama360 = attrs.panorama360;
+  const hasParametersSelectionWithItems = (sections as unknown[]).some((s) => {
+    const section = s as { __component?: string; items?: unknown[] };
+    return section.__component === "sections.section-parameters" && Array.isArray(section.items) && section.items.length > 0;
+  });
+  const mergedSections: ProductSection[] =
+    !hasParametersSelectionWithItems && parameters.length > 0
+      ? [
+          {
+            __component: "sections.section-parameters",
+            title: "产品参数",
+            items: parameters.map((p, i) => ({
+              id: i + 1,
+              group: p.group,
+              isFeatured: p.isFeatured,
+              key: p.key,
+              value: p.value,
+            })),
+          } as ProductSection,
+          ...sections,
+        ]
+      : sections;
+  const hasPanoramaSelection = (sections as unknown[]).some((s) => (s as { __component?: string }).__component === "sections.section-panorama360");
 
   return (
     <div className="min-h-screen bg-white text-black">
       <Header />
-      <main className="pt-28 pb-24 sm:pt-36">
-        <div className="mx-auto max-w-[900px] px-6 sm:px-8">
-          <nav className="mb-8 text-[13px] text-black/50" aria-label="面包屑">
-            <Link href="/" className="hover:text-black">首页</Link>
-            <span className="mx-2">/</span>
-            <Link href="/products" className="hover:text-black">产品中心</Link>
-            <span className="mx-2">/</span>
-            <span className="text-black/80">{attrs.name}</span>
-          </nav>
+      {/* Hero 需要贴顶展示，不能被 main 的 padding-top 顶下去 */}
+      <main className="pb-24">
+        {/* 全宽 Hero（封面图/视频 + 标题/摘要叠加） */}
+        {enableSpecialCover ? (
+          <ProductBentoCover
+            title={attrs.name}
+            summary={attrs.summary}
+            images={coverGalleryUrls}
+          />
+        ) : (
+          <section className="relative">
+            {coverUrl ? (
+              <div className={`relative w-full overflow-hidden bg-black/[0.04] ${coverHeightClass}`}>
+                {isVideo ? (
+                  <video
+                    className="absolute inset-0 h-full w-full object-cover"
+                    src={coverUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <Image
+                    src={coverUrl}
+                    alt={attrs.name}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority
+                    unoptimized
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-black/0" />
+              </div>
+            ) : (
+              <div className="h-[40vh] min-h-[320px] w-full bg-black/[0.04]" />
+            )}
 
-          <h1 className="text-3xl font-light tracking-tight sm:text-4xl">
-            {attrs.name}
-          </h1>
-          {attrs.summary && (
-            <p className="mt-6 text-[17px] leading-relaxed text-black/80">
-              {attrs.summary}
-            </p>
-          )}
-
-          {coverUrl && (
-            <div className="relative mt-10 aspect-[16/10] overflow-hidden rounded-2xl bg-black/[0.04]">
-              {isVideo ? (
-                <video
-                  className="h-full w-full object-cover"
-                  src={coverUrl}
-                  controls
-                  loop
-                  muted
-                  playsInline
-                />
-              ) : (
-                <Image
-                  src={coverUrl}
-                  alt={attrs.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 900px) 100vw, 900px"
-                  unoptimized
-                />
-              )}
+            <div className="pointer-events-none absolute inset-0">
+              <div className={`mx-auto flex h-full w-full max-w-[1400px] px-6 sm:px-10 ${coverOverlayAlignClass}`}>
+                <div className="pointer-events-auto max-w-2xl">
+                  <h1 className={coverTitleClass} style={{ color: coverTextColor }}>
+                    {attrs.name}
+                  </h1>
+                  {attrs.summary && (
+                    <p className={coverSummaryClass} style={{ color: coverTextColor, opacity: 0.9 }}>
+                      {attrs.summary}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
+          </section>
+        )}
 
-          {attrs.hasPanorama360 && (
-            <section className="mt-10 rounded-2xl border border-black/[0.08] bg-black/[0.02] p-6">
-              <h2 className="text-lg font-medium text-black/80">360° 全景</h2>
-              <p className="mt-2 text-[15px] text-black/60">
-                本产品支持 360° 全景预览，可在详情页或联系客服体验。
-              </p>
-            </section>
-          )}
+        {/* 正文内容区（保持可读宽度） */}
+        {/* 注意：不要在这里加 px，否则会和 ProductSections 内部的 px 叠加导致不对齐 */}
+        <div className="w-full">
 
-          {parameters.length > 0 && (
-            <section className="mt-10">
-              <h2 className="text-lg font-medium text-black/80">产品参数</h2>
-              <dl className="mt-4 grid gap-2 sm:grid-cols-2">
-                {parameters.map((p, i) => (
-                  <div key={i} className="flex border-b border-black/[0.06] py-2">
-                    <dt className="w-28 shrink-0 text-[15px] text-black/60">{p.key}</dt>
-                    <dd className="text-[15px] text-black/90">{p.value}</dd>
+          {!hasPanoramaSelection && panorama360 && panorama360.enabled !== false && (
+            <section className="mt-10 px-6 sm:px-8">
+              {/* selection 背景（视频 > 图片 > 颜色） */}
+              {(() => {
+                const bgVideoUrl = getStrapiMediaUrl(panorama360.background?.backgroundVideo);
+                const bgImageUrl = getStrapiMediaUrl(panorama360.background?.backgroundImage);
+                const bgColor = panorama360.background?.backgroundColor ?? "rgba(0,0,0,0.04)";
+
+                if (bgVideoUrl) {
+                  return (
+                    <div className="relative overflow-hidden rounded-2xl border border-black/[0.08] bg-black/[0.02] p-6">
+                      <video className="absolute inset-0 h-full w-full object-cover" src={bgVideoUrl} autoPlay loop muted playsInline aria-hidden />
+                      <div className="relative">
+                        <h2 className="text-lg font-medium text-black/80">{panorama360.title ?? "360° 全景"}</h2>
+                        {panorama360.description && (
+                          <p className="mt-2 text-[15px] text-black/60">{panorama360.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (bgImageUrl) {
+                  return (
+                    <div className="relative overflow-hidden rounded-2xl border border-black/[0.08] bg-black/[0.02] p-6">
+                      <Image src={bgImageUrl} alt="" fill className="object-cover" unoptimized aria-hidden />
+                      <div className="relative">
+                        <h2 className="text-lg font-medium text-black/80">{panorama360.title ?? "360° 全景"}</h2>
+                        {panorama360.description && (
+                          <p className="mt-2 text-[15px] text-black/60">{panorama360.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="relative overflow-hidden rounded-2xl border border-black/[0.08] bg-black/[0.02] p-6" style={{ backgroundColor: bgColor }}>
+                    <h2 className="text-lg font-medium text-black/80">{panorama360.title ?? "360° 全景"}</h2>
+                    {panorama360.description && (
+                      <p className="mt-2 text-[15px] text-black/60">{panorama360.description}</p>
+                    )}
                   </div>
-                ))}
-              </dl>
+                );
+              })()}
             </section>
           )}
 
           {modules.length > 0 && (
             <div className="mt-12 space-y-12">
               {modules.map((mod, i) => (
-                <section key={i} className="border-t border-black/[0.06] pt-10">
-                  <h2 className="text-xl font-light tracking-tight text-black">
-                    {mod.name}
-                  </h2>
+                <section key={i} className="border-t border-black/[0.06] px-6 pt-10 sm:px-8">
+                  <h2 className="text-2xl font-extralight tracking-tight text-black sm:text-3xl">{mod.name}</h2>
                   {mod.description && (
                     <p className="mt-4 text-[15px] leading-relaxed text-black/80">
                       {mod.description}
@@ -285,15 +389,20 @@ function ProductDetailCMS({ product }: { product: ProductFromCMS }) {
             </div>
           )}
 
-          {sections.length > 0 && <ProductSections sections={sections} />}
+          {mergedSections.length > 0 && (
+            <ProductSections
+              sections={mergedSections}
+              enableContinuousTextOnlyDisplay={enableContinuousTextOnlyDisplay}
+            />
+          )}
 
           {attrs.description && (
-            <div className="mt-10 text-[15px] leading-relaxed text-black/80">
+            <div className="mt-10 px-6 text-[15px] leading-relaxed text-black/80 sm:px-8">
               <p>{attrs.description}</p>
             </div>
           )}
 
-          <div className="mt-12 flex flex-wrap gap-4">
+          <div className="mt-12 flex flex-wrap gap-4 px-6 sm:px-8">
             <a
               href="tel:13210577152"
               className="rounded-full border border-black/20 bg-black px-8 py-3 text-[14px] font-medium text-white transition hover:bg-black/90"

@@ -7,147 +7,155 @@ import {
   site,
 } from "@/lib/content";
 import {
-  getHomeHeroFromCMS,
-  homeHeroFromCMSFallback,
   getStrapiMediaUrl,
   getHomePageFromCMS,
+  getHomePageCoverHero,
   getHomePageSections,
+  getProductCategoriesFromCMS,
 } from "@/lib/cmsClient";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProductCategories } from "@/components/ProductCategories";
-import { ProductStrip } from "@/components/ProductStrip";
-import { MarqueeText } from "@/components/MarqueeText";
-import { ProductSections, type ProductSection } from "@/components/sections/ProductSections";
+import { HomeCoverHero } from "@/components/HomeCoverHero";
+import { ProductSections, type ProductSection } from "@/components/sections";
+import type { SectionCoverHero } from "@/components/sections/types";
 
 export default async function Home() {
-  const heroFromCMS = await getHomeHeroFromCMS();
-  const heroData = homeHeroFromCMSFallback(hero, heroFromCMS);
+  const categoryOrder = [
+    "游艇",
+    "工作艇",
+    "客船",
+    "趸船",
+    "帆船",
+    "仿古画舫船",
+    "钓鱼艇",
+    "水陆两栖船",
+    "新能源游艇",
+  ];
+  const orderIndex = new Map(categoryOrder.map((name, idx) => [name, idx]));
+  const heroBase = hero;
   const homePageFromCMS = await getHomePageFromCMS();
-  const homeSections = getHomePageSections(homePageFromCMS) as ProductSection[];
+  const coverFromPage = getHomePageCoverHero(homePageFromCMS) as SectionCoverHero | null;
+  const homeSectionsRaw = getHomePageSections(homePageFromCMS) as ProductSection[];
+  const homeSectionsForPage = homeSectionsRaw;
+
   const featured = getFeaturedProducts();
   const categories = getProductCategories();
-  const heroVideoUrl =
-    heroFromCMS ? getStrapiMediaUrl((heroFromCMS as { attributes?: { video?: unknown }; video?: unknown }).attributes?.video ?? heroFromCMS.video) : null;
-  const heroImageUrl =
-    heroFromCMS ? getStrapiMediaUrl((heroFromCMS as { attributes?: { image?: unknown }; image?: unknown }).attributes?.image ?? heroFromCMS.image) : null;
-  const heroIsVideo = Boolean(heroVideoUrl);
-  const marqueeEnabled = Boolean(
-    (heroFromCMS?.attributes?.marqueeEnabled ?? heroFromCMS?.marqueeEnabled) &&
-      (heroFromCMS?.attributes?.marqueeText ?? heroFromCMS?.marqueeText),
+  const categoryProductsMap = new Map<string, (typeof featured)[number]>();
+  for (const p of featured) {
+    if (!categoryProductsMap.has(p.category)) {
+      categoryProductsMap.set(p.category, p);
+    }
+  }
+  const cmsCategories = await getProductCategoriesFromCMS();
+  const cmsCategoryCards = cmsCategories
+    .map((entry) => {
+      const a = entry.attributes ?? entry;
+      return {
+        id: entry.id,
+        name: a.name ?? "",
+        slug: a.slug ?? "",
+        summary: a.summary ?? a.description ?? "",
+        cover: a.cover,
+      };
+    })
+    .filter((c) => c.name && c.slug);
+  const fallbackCategoryCards = categories.map((cat) => {
+    const p = categoryProductsMap.get(cat.name);
+    return {
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      summary: "",
+      cover: cat.image || p?.image || "",
+    };
+  });
+  const sortByOrder = <T extends { name: string }>(list: T[]) =>
+    [...list].sort((a, b) => {
+      const ia = orderIndex.get(a.name) ?? Number.MAX_SAFE_INTEGER;
+      const ib = orderIndex.get(b.name) ?? Number.MAX_SAFE_INTEGER;
+      return ia - ib;
+    });
+  const categoryCards =
+    cmsCategoryCards.length > 0 ? sortByOrder(cmsCategoryCards) : sortByOrder(fallbackCategoryCards);
+  const homeSectionsWithCategory = homeSectionsForPage.map((section) =>
+    section.__component === "sections.section-product-categories"
+      ? { ...section, categories: categoryCards }
+      : section,
+  ) as ProductSection[];
+  const hasCategorySection = homeSectionsWithCategory.some(
+    (section) => section.__component === "sections.section-product-categories",
   );
-  const marqueeText = (heroFromCMS?.attributes?.marqueeText ?? heroFromCMS?.marqueeText) ?? "";
-  const marqueeSpeed = (heroFromCMS?.attributes?.marqueeSpeed ?? heroFromCMS?.marqueeSpeed) ?? 28;
+  const homeTopSections: ProductSection[] = hasCategorySection
+    ? homeSectionsWithCategory.filter(
+        (section) => section.__component === "sections.section-product-categories",
+      )
+    : [
+        {
+          __component: "sections.section-product-categories",
+          title: "产品分类",
+          subtitle: "",
+          titleAlign: "center",
+          stylePreset: "six-strip",
+          maxItems: 9,
+          categories: categoryCards,
+        } as ProductSection,
+      ];
+  const homeOtherSections = homeSectionsWithCategory.filter(
+    (section) => section.__component !== "sections.section-product-categories",
+  );
+
+  let heroData = heroBase;
+  let heroVideoUrl: string | null = null;
+  let heroImageUrl: string | null = null;
+  let marqueeEnabled = false;
+  let marqueeText = "";
+  let marqueeSpeed = 28;
+  let coverHeightMode: "full" | "two_thirds" = heroBase.coverHeightMode ?? "full";
+
+  if (coverFromPage) {
+    const s = coverFromPage;
+    heroVideoUrl = getStrapiMediaUrl(s.video);
+    heroImageUrl = getStrapiMediaUrl(s.image);
+    const ctas: { label: string; href: string }[] = [];
+    if (s.ctaLabel && s.ctaHref) ctas.push({ label: s.ctaLabel, href: s.ctaHref });
+    if (s.ctaLabel2 && s.ctaHref2) ctas.push({ label: s.ctaLabel2, href: s.ctaHref2 });
+    heroData = {
+      ...heroBase,
+      title: s.title ?? heroBase.title,
+      subtitle: s.subtitle ?? heroBase.subtitle,
+      cta: ctas.length > 0 ? ctas : heroBase.cta,
+    };
+    marqueeEnabled = Boolean(s.marqueeEnabled && s.marqueeText);
+    marqueeText = s.marqueeText ?? "";
+    marqueeSpeed = s.marqueeSpeed ?? 28;
+    coverHeightMode = s.coverHeightMode === "two_thirds" ? "two_thirds" : "full";
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
       <Header />
 
-      {/* 首屏 Hero */}
-      <section className="relative flex min-h-[100vh] flex-col items-center justify-end overflow-hidden bg-black pb-24 pt-28 text-white sm:pb-32 sm:pt-36">
-        {heroIsVideo ? (
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            src={heroVideoUrl!}
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
-        ) : (
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${heroImageUrl || heroData.backgroundImage})` }}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/35" />
-        <div className="relative z-10 flex w-full max-w-[600px] flex-col items-center text-center">
-          <h1 className="text-4xl font-extralight tracking-tight sm:text-5xl md:text-6xl">
-            {heroData.title}
-          </h1>
-          <p className="mt-4 text-lg font-normal text-white/90 sm:text-xl">
-            {heroData.subtitle}
-          </p>
-          {heroData.cta && heroData.cta.length > 0 && (
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href={heroData.cta[0].href}
-                className="min-w-[140px] rounded border border-white bg-white px-8 py-2.5 text-center text-[13px] font-medium text-black transition hover:bg-white/90"
-              >
-                {heroData.cta[0].label}
-              </Link>
-              {heroData.cta[1] && (
-                <Link
-                  href={heroData.cta[1].href}
-                  className="min-w-[140px] rounded border border-white/80 bg-transparent px-8 py-2.5 text-center text-[13px] font-medium text-white transition hover:bg-white/10"
-                >
-                  {heroData.cta[1].label}
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
+      <HomeCoverHero
+        heroData={heroData}
+        videoUrl={heroVideoUrl}
+        imageUrl={heroImageUrl}
+        marqueeEnabled={marqueeEnabled}
+        marqueeText={marqueeText}
+        marqueeSpeed={marqueeSpeed}
+        heightMode={coverHeightMode}
+      />
 
-        {/* 底部滚动字幕（可选） */}
-        {marqueeEnabled && (
-          <div className="relative z-10 mt-14 w-full max-w-[1200px] px-6 sm:px-8">
-            <MarqueeText text={marqueeText} durationSec={marqueeSpeed} />
-          </div>
-        )}
-      </section>
-
-      {/* 主页产品分类（首屏下第一块，非顶部导航） */}
-      <section className="border-t border-black/6 bg-white">
-        <div className="mx-auto max-w-[1200px] px-6 py-20 sm:px-8 lg:py-24">
-          <p className="text-[11px] font-medium uppercase tracking-widest text-black/50">
-            产品中心
-          </p>
-          <h2 className="mt-3 text-3xl font-extralight tracking-tight sm:text-4xl">
-            产品分类
-          </h2>
-          <p className="mt-4 max-w-xl text-[15px] text-black/70">
-            游艇、客船、帆船、钓鱼艇、工作艇、趸船、仿古画舫船、水陆两栖船、新能源游艇
-          </p>
-          <ProductCategories
-            categories={categories}
-            variant="grid"
-            className="mt-10"
-          />
-          <div className="mt-10 text-center">
-            <Link
-              href="/products"
-              className="text-[13px] font-medium text-black/80 hover:text-black"
-            >
-              进入产品中心 →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 精选产品 - 全宽交替大图+文案 */}
-      <section className="border-t border-black/6">
-        {featured.map((product, index) => (
-          <ProductStrip
-            key={product.id}
-            product={product}
-            reverse={index % 2 === 1}
-            priority={index < 2}
-          />
-        ))}
-        <div className="flex justify-center border-t border-black/6 py-14">
-          <Link
-            href="/products"
-            className="rounded border border-black/20 bg-transparent px-10 py-3 text-[13px] font-medium text-black transition hover:bg-black/5"
-          >
-            查看更多产品
-          </Link>
-        </div>
-      </section>
+      {/* 主页产品分类模块（支持 Strapi 首页 Sections 配置） */}
+      {homeTopSections.length > 0 && (
+        <section className="border-t border-black/6">
+          <ProductSections sections={homeTopSections} />
+        </section>
+      )}
 
       {/* 首页自定义 Sections（来自 Strapi，可拖拽排序） */}
-      {homeSections.length > 0 && (
+      {homeOtherSections.length > 0 && (
         <section className="border-t border-black/6 py-20">
-          <ProductSections sections={homeSections} />
+          <ProductSections sections={homeOtherSections} />
         </section>
       )}
 

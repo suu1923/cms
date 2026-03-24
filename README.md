@@ -11,6 +11,31 @@ npm run dev
 
 访问 [http://localhost:3000](http://localhost:3000)。
 
+## 可选：接入 Strapi（后台驱动内容）
+
+默认情况下，本项目会使用 `src/data/*.json` 的本地内容。像 `tianhai-demo` 这种 **Strapi bootstrap 自动生成的演示产品**，只有在前端配置了 CMS 地址后才能访问到：
+
+- **创建本地环境变量文件**：复制 `.env.local.example` 为 `.env.local`
+- **确认 Strapi 在运行**：`cd strapi && npm run develop`
+
+然后访问 `http://localhost:3000/products/tianhai-demo` 应该能命中后台数据。
+
+如果仍然提示未找到：
+- **检查 `CMS_BASE_URL`** 是否是 `http://localhost:1337/api`（必须带 `/api`）
+- **检查 Strapi 权限**：在后台把 `products` 的 `find/findOne` 对 `Public` 放开，或在 `.env.local` 里配置 `CMS_TOKEN`
+
+首页「产品展示」等 **客户端组件**里的封面图/视频，Strapi 常返回相对路径 `/uploads/...`。服务端能读 `CMS_BASE_URL` 拼完整地址，**浏览器里读不到**，需在 `.env.local` 增加其一（与 `CMS_BASE_URL` 同源、去掉 `/api`）：
+
+- **`NEXT_PUBLIC_CMS_ORIGIN`**（推荐），例如：`http://localhost:1337`
+- 或 **`NEXT_PUBLIC_CMS_BASE_URL`**，例如：`http://localhost:1337/api`（会自动去掉 `/api`）
+
+否则封面在浏览器里会请求到 Next 本站域名下的 `/uploads/...`，导致 404、背景不显示。
+
+## 首页封面（Strapi）
+
+- **「首页（Sections）」动态区**可添加 **「首页封面」** 组件（`section-cover-hero`），用于在后台配置首屏大图/视频、标题、按钮、跑马灯及 **封面高度**（`full` 满屏 / `two_thirds` 约屏幕 2/3）。
+- 若未添加该组件，前端回退到本地 `src/data/hero.json` 内容。
+
 ## 内容编辑（JSON）
 
 所有可编辑文案与配置在 `src/data/` 下，改完保存即可，无需后端：
